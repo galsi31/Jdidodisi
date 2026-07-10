@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#070b14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="100K RPG" />
+  <meta name="description" content="Личная RPG-система денег, продуктивности, внешности и дисциплины." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="icon" href="icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>100K RPG</title>
+</head>
+<body>
+  <div id="noise"></div>
+
+  <section id="lock-screen" class="screen-layer hidden">
+    <div class="lock-card glass">
+      <div class="app-mark big">M</div>
+      <div class="eyebrow">PRIVATE LIFE OS</div>
+      <h1>100K RPG</h1>
+      <p>Введите PIN, чтобы открыть сохранение.</p>
+      <input id="pin-input" class="pin-input" inputmode="numeric" maxlength="8" placeholder="••••" />
+      <button id="unlock-btn" class="primary-btn wide">Разблокировать</button>
+      <div id="pin-error" class="form-error"></div>
+    </div>
+  </section>
+
+  <section id="onboarding" class="screen-layer hidden">
+    <div class="onboarding-card glass">
+      <div class="onboarding-orb">⚡</div>
+      <div class="eyebrow">НОВАЯ ИГРА</div>
+      <h1>Создай персонажа</h1>
+      <p>Все планы можно менять позже. Здесь нет «неправильных» целей.</p>
+      <label>Имя персонажа</label>
+      <input id="onboarding-name" value="Максим" maxlength="24" />
+      <label>Старт текущего семидневного сезона</label>
+      <input id="onboarding-cycle" type="date" />
+      <button id="start-game-btn" class="primary-btn wide">Начать прокачку</button>
+    </div>
+  </section>
+
+  <div id="app" class="app-shell hidden">
+    <header class="topbar">
+      <button class="avatar-btn" data-nav="profile">
+        <span class="avatar-ring"><span id="avatar-letter">M</span></span>
+      </button>
+      <div class="topbar-center">
+        <div id="top-title" class="top-title">КОМАНДНЫЙ ЦЕНТР</div>
+        <div id="top-subtitle" class="top-subtitle">Сезон 1</div>
+      </div>
+      <button id="quick-add-btn" class="icon-btn neon" aria-label="Быстрое добавление">＋</button>
+    </header>
+
+    <main id="pages">
+      <section id="page-dashboard" class="page active">
+        <div class="hero-card boss-card glass">
+          <div class="hero-grid"></div>
+          <div class="boss-head">
+            <div>
+              <div class="eyebrow red">НЕДЕЛЬНЫЙ БОСС</div>
+              <h2 id="boss-title">100 000 ₽</h2>
+              <div id="cycle-range" class="muted">—</div>
+            </div>
+            <div id="boss-face" class="boss-face">🐉</div>
+          </div>
+          <div class="hp-labels">
+            <span>Нанесено урона</span>
+            <strong id="boss-damage">0 ₽</strong>
+          </div>
+          <div class="meter hp-meter"><span id="boss-hp-bar"></span></div>
+          <div class="boss-stats">
+            <div><span>Осталось HP</span><strong id="boss-left">100 000 ₽</strong></div>
+            <div><span>Нужно в день</span><strong id="boss-daily">14 286 ₽</strong></div>
+            <div><span>Дней</span><strong id="days-left">7</strong></div>
+          </div>
+          <button class="damage-btn" data-action="income">⚔ Нанести денежный урон</button>
+        </div>
+
+        <div class="character-card glass">
+          <div class="character-visual">
+            <div class="level-orbit"></div>
+            <div class="character-core">M</div>
+            <div id="rank-badge" class="rank-badge">НОВИЧОК</div>
+          </div>
+          <div class="character-info">
+            <div class="eyebrow purple">ПЕРСОНАЖ</div>
+            <h2><span id="player-name">Максим</span> · LVL <span id="player-level">1</span></h2>
+            <div class="meter xp-meter"><span id="xp-bar"></span></div>
+            <div class="xp-row"><span id="xp-current">0 XP</span><span id="xp-next">500 до уровня</span></div>
+            <div class="mini-stats">
+              <div><span>🔥 Комбо</span><strong id="combo-value">0</strong></div>
+              <div><span>🪙 Монеты</span><strong id="coin-value">0</strong></div>
+              <div><span>🏆 Трофеи</span><strong id="trophy-value">0</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">СЕГОДНЯ</div>
+            <h3>Daily-миссии</h3>
+          </div>
+          <button class="text-btn" data-nav="daily">Открыть арену</button>
+        </div>
+        <div id="today-missions" class="mission-stack"></div>
+
+        <div class="section-head">
+          <div>
+            <div class="eyebrow gold">ГЛАВНЫЕ ЦЕЛИ</div>
+            <h3>Прогресс кампании</h3>
+          </div>
+          <button class="text-btn" data-nav="goals">Все цели</button>
+        </div>
+        <div id="featured-goals" class="goal-grid"></div>
+
+        <div class="season-summary glass">
+          <div>
+            <div class="eyebrow cyan">ТЕКУЩИЙ СЕЗОН</div>
+            <h3 id="season-rank">Ранг D</h3>
+          </div>
+          <div class="season-score"><strong id="season-score">0</strong><span>/100</span></div>
+          <div class="meter season-meter"><span id="season-bar"></span></div>
+          <div class="season-grid">
+            <div><span>Квесты</span><strong id="season-quests">0 XP</strong></div>
+            <div><span>Идеальные дни</span><strong id="season-perfect">0/7</strong></div>
+            <div><span>Силовые</span><strong id="season-workouts">0/3</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-daily" class="page">
+        <div class="page-intro">
+          <div>
+            <div class="eyebrow lime">ТРЕНИРОВОЧНАЯ АРЕНА</div>
+            <h1>Сегодняшний забег</h1>
+            <p id="daily-date">—</p>
+          </div>
+          <div id="daily-xp-ring" class="xp-ring"><span>0</span><small>XP</small></div>
+        </div>
+
+        <div id="daily-habits" class="daily-list"></div>
+
+        <div class="glass metric-panel">
+          <div class="section-head compact">
+            <div><div class="eyebrow orange">ТЕЛО</div><h3>Калории и тренировка</h3></div>
+          </div>
+          <div class="metric-inputs">
+            <label><span>Съедено</span><input id="calories-in" type="number" inputmode="numeric" placeholder="0" /></label>
+            <label><span>Сожжено</span><input id="calories-out" type="number" inputmode="numeric" placeholder="0" /></label>
+          </div>
+          <button id="save-calories-btn" class="secondary-btn wide">Сохранить калории</button>
+          <button id="quick-workout-btn" class="primary-btn wide">🏋 Засчитать силовую</button>
+        </div>
+
+        <div class="perfect-card glass">
+          <div class="perfect-icon">⭐</div>
+          <div>
+            <div class="eyebrow gold">ИДЕАЛЬНЫЙ ДЕНЬ</div>
+            <h3 id="perfect-status">Пока не закрыт</h3>
+            <p>Выполни денежное действие, главную задачу и все ежедневные привычки.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-goals" class="page">
+        <div class="page-intro">
+          <div>
+            <div class="eyebrow gold">КАРТА ПРОКАЧКИ</div>
+            <h1>Цели и планы</h1>
+            <p>Любую цель можно изменить, поставить на паузу или заменить.</p>
+          </div>
+          <button class="icon-btn neon" data-action="new-goal">＋</button>
+        </div>
+        <div id="goal-filters" class="chips"></div>
+        <div id="goals-list" class="goals-list"></div>
+      </section>
+
+      <section id="page-money" class="page">
+        <div class="page-intro">
+          <div>
+            <div class="eyebrow gold">ЗОЛОТОЕ ХРАНИЛИЩЕ</div>
+            <h1>Деньги</h1>
+            <p>Доходы бьют босса. Накопления приближают свободу.</p>
+          </div>
+          <button class="icon-btn neon" data-action="income">＋</button>
+        </div>
+
+        <div class="money-summary">
+          <div class="glass money-kpi"><span>Доход сезона</span><strong id="money-cycle-income">0 ₽</strong></div>
+          <div class="glass money-kpi"><span>Расход сезона</span><strong id="money-cycle-expense">0 ₽</strong></div>
+          <div class="glass money-kpi"><span>Фонд свободы</span><strong id="money-savings">0 ₽</strong></div>
+        </div>
+
+        <div class="quick-actions">
+          <button class="quick-action income" data-action="income"><span>＋</span>Доход</button>
+          <button class="quick-action expense" data-action="expense"><span>−</span>Расход</button>
+          <button class="quick-action saving" data-action="saving"><span>⇧</span>В фонд</button>
+        </div>
+
+        <div class="section-head">
+          <div><div class="eyebrow">ЛОГ</div><h3>Последние операции</h3></div>
+        </div>
+        <div id="transactions-list" class="transaction-list"></div>
+      </section>
+
+      <section id="page-quests" class="page">
+        <div class="page-intro">
+          <div>
+            <div class="eyebrow purple">ЖУРНАЛ КВЕСТОВ</div>
+            <h1>Миссии</h1>
+            <p>Большие задачи дают больше XP и меняют жизнь быстрее.</p>
+          </div>
+          <button class="icon-btn neon" data-action="new-quest">＋</button>
+        </div>
+        <div id="quest-tabs" class="chips">
+          <button class="chip active" data-quest-filter="active">Активные</button>
+          <button class="chip" data-quest-filter="done">Завершённые</button>
+          <button class="chip" data-quest-filter="all">Все</button>
+        </div>
+        <div id="quests-list" class="quest-list"></div>
+      </section>
+
+      <section id="page-seasons" class="page">
+        <div class="page-intro">
+          <div>
+            <div class="eyebrow cyan">АРЕНА СЕЗОНОВ</div>
+            <h1>История семидневок</h1>
+            <p>Каждые 7 дней начинается новый сезон, а цель 100К повторяется.</p>
+          </div>
+        </div>
+        <div id="seasons-list" class="seasons-list"></div>
+      </section>
+
+      <section id="page-rewards" class="page">
+        <div class="page-intro">
+          <div>
+            <div class="eyebrow gold">МАГАЗИН НАГРАД</div>
+            <h1>Лут и трофеи</h1>
+            <p>Награды покупаются за монеты, полученные из XP.</p>
+          </div>
+          <div class="coin-pill">🪙 <span id="reward-coins">0</span></div>
+        </div>
+        <div class="section-head"><div><div class="eyebrow">МАГАЗИН</div><h3>Доступные награды</h3></div><button class="text-btn" data-action="new-reward">Добавить</button></div>
+        <div id="rewards-list" class="rewards-grid"></div>
+        <div class="section-head"><div><div class="eyebrow gold">ТРОФЕИ</div><h3>Достижения</h3></div></div>
+        <div id="achievements-list" class="achievement-grid"></div>
+      </section>
+
+      <section id="page-profile" class="page">
+        <div class="profile-hero glass">
+          <div class="profile-avatar"><span id="profile-letter">M</span></div>
+          <div>
+            <div class="eyebrow purple">ПРОФИЛЬ ПЕРСОНАЖА</div>
+            <h1 id="profile-name">Максим</h1>
+            <p id="profile-rank">Новичок · уровень 1</p>
+          </div>
+        </div>
+
+        <div class="settings-group glass">
+          <h3>Персонаж</h3>
+          <label>Имя<input id="settings-name" maxlength="24" /></label>
+          <label>Старт первого сезона<input id="settings-cycle-start" type="date" /></label>
+          <button id="save-profile-btn" class="primary-btn wide">Сохранить профиль</button>
+        </div>
+
+        <div class="settings-group glass">
+          <h3>Игровые настройки</h3>
+          <label class="switch-row"><span>Звуковые эффекты</span><input id="sounds-toggle" type="checkbox" /></label>
+          <label class="switch-row"><span>Вибрация</span><input id="haptics-toggle" type="checkbox" /></label>
+          <label class="switch-row"><span>Требовать PIN</span><input id="pin-toggle" type="checkbox" /></label>
+          <div id="pin-settings" class="pin-settings hidden">
+            <label>Новый PIN<input id="new-pin" inputmode="numeric" maxlength="8" placeholder="4–8 цифр" /></label>
+          </div>
+          <button id="save-security-btn" class="secondary-btn wide">Сохранить безопасность</button>
+        </div>
+
+        <div class="settings-group glass">
+          <h3>Сохранение</h3>
+          <p>Данные хранятся локально на этом устройстве. Делай резервную копию перед сменой телефона или очисткой Safari.</p>
+          <div class="button-grid">
+            <button id="export-btn" class="secondary-btn">Экспорт</button>
+            <label class="secondary-btn file-btn">Импорт<input id="import-input" type="file" accept="application/json" /></label>
+          </div>
+          <button id="reset-btn" class="danger-btn wide">Удалить все данные</button>
+        </div>
+
+        <div class="settings-group glass">
+          <h3>Установка на iPhone</h3>
+          <ol class="install-list">
+            <li>Открой опубликованную ссылку в Safari.</li>
+            <li>Нажми «Поделиться».</li>
+            <li>Выбери «На экран Домой».</li>
+            <li>Включи «Открывать как веб‑приложение».</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button data-nav="dashboard" class="active"><span>⌂</span><small>Главная</small></button>
+      <button data-nav="daily"><span>⚡</span><small>Сегодня</small></button>
+      <button data-nav="goals"><span>◈</span><small>Цели</small></button>
+      <button data-nav="money"><span>₽</span><small>Деньги</small></button>
+      <button data-nav="quests"><span>⚔</span><small>Квесты</small></button>
+    </nav>
+  </div>
+
+  <div id="quick-menu" class="bottom-sheet hidden">
+    <div class="sheet-backdrop" data-close-sheet></div>
+    <div class="sheet-panel">
+      <div class="sheet-handle"></div>
+      <h3>Быстрое действие</h3>
+      <div class="sheet-grid">
+        <button data-action="income">💰<span>Доход</span></button>
+        <button data-action="expense">💸<span>Расход</span></button>
+        <button data-action="saving">🚀<span>В фонд</span></button>
+        <button data-action="new-quest">⚔<span>Квест</span></button>
+        <button data-action="new-goal">◈<span>Цель</span></button>
+        <button data-nav="rewards">🎁<span>Награды</span></button>
+        <button data-nav="seasons">🏆<span>Сезоны</span></button>
+        <button data-nav="profile">👤<span>Профиль</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-card glass">
+      <button class="modal-close" data-close-modal>×</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <div id="fx-layer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
